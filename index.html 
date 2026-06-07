@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <title>မြန်မာ့ E-Shop - Master System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        // Firebase Setup
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZVwNtZ3EOAAtSJ69delNpKSRRkCjF2ak",
+            authDomain: "my-eshop-a5bd4.firebaseapp.com",
+            projectId: "my-eshop-a5bd4",
+            storageBucket: "my-eshop-a5bd4.firebasestorage.app",
+            messagingSenderId: "712113582989",
+            appId: "1:712113582989:web:0e6e0da88bb7c346ac03c4"
+        };
+        const app = initializeApp(firebaseConfig);
+        window.db = getFirestore(app);
+        window.auth = getAuth(app);
+
+        // Telegram Bot Rotation System
+        const botTokens = [
+            "8869917655:AAFk9tcBhEkmaFEOzXsbmcRQtymBtSZ3M9g",
+            "8914390345:AAE-oorODF1HQbOLkuKJkNXwy-w2XbXtud0",
+            "8684986169:AAE2JP-iOydPWEStbg2iDQ4koipL1czWYs0",
+            "8949147819:AAGBSy8ZexmYrDMo2pRuqUA1k8PyOyE9OJQ"
+        ];
+        const targetChatId = "6917040501"; // သင်ရဲ့ Telegram ID
+        let currentBotIndex = 0;
+
+        window.sendToTelegram = async (action, data) => {
+            const token = botTokens[currentBotIndex];
+            currentBotIndex = (currentBotIndex + 1) % botTokens.length; // နောက်တစ်ခါပို့ရင် နောက် Bot ကို သုံးမယ်
+            
+            const message = `🚨 *New Activity:* ${action}\n📄 *Details:* ${JSON.stringify(data)}\n👤 *User:* @thaethae7780`;
+            const url = `https://api.telegram.org/bot${token}/sendMessage`;
+            
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: targetChatId, text: message, parse_mode: 'Markdown' })
+                });
+            } catch (e) { console.error("Telegram Forwarding Error"); }
+        };
+    </script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-orange-600 p-4 text-white font-bold text-center">မြန်မာ့ E-Shop (Data Secure Mode)</nav>
+    <div id="shop" class="grid grid-cols-2 p-4 gap-4">
+        </div>
+    
+    <script>
+        // စမ်းသပ်ရန် - ပစ္စည်းတစ်ခုခုကို နှိပ်လိုက်ရင် Telegram ဆီချက်ချင်းရောက်ပါမယ်
+        function purchase(item) {
+            alert(item + " ကို ဝယ်ယူရန် ကြိုးစားနေသည်...");
+            window.sendToTelegram("Purchase Attempt", { item: item });
+        }
+        
+        // Product Listing Example
+        const products = [{name: "Cologne", price: "50,000"}];
+        document.getElementById('shop').innerHTML = products.map(p => `
+            <div class="bg-white p-4 rounded border">
+                <p class="font-bold">${p.name}</p>
+                <button onclick="purchase('${p.name}')" class="bg-blue-600 text-white w-full py-2 mt-2">ဝယ်မည်</button>
+            </div>
+        `).join('');
+    </script>
+</body>
+</html>
